@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found | CinemaThéo</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .error-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .error-content {
+            max-width: 600px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .error-code {
+            font-size: 8rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
+            margin-bottom: 1rem;
+        }
+
+        .error-title {
+            font-size: 2rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .error-message {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-20px);
+            }
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .home-link {
+            display: inline-block;
+            background: var(--primary);
+            color: var(--text);
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .home-link:hover {
+            background: #ff1f2a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(229, 9, 20, 0.4);
+        }
+
+        .suggestions {
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .suggestions h4 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .suggestions ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .suggestions li {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .suggestions a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .suggestions a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-page">
+        <div class="error-content">
+            <div class="error-icon">🎬</div>
+            <div class="error-code">404</div>
+            <h1 class="error-title">Scene Not Found</h1>
+            <p class="error-message">
+                Oops! The page you're looking for has been cut from the movie. 
+                It might have been moved, deleted, or never existed in the first place.
+            </p>
+            <a href="/" class="home-link">Return to Home</a>
+            
+            <div class="suggestions">
+                <h4>What were you looking for?</h4>
+                <ul>
+                    <li><a href="/">🏠 Home - Browse our movies</a></li>
+                    <li><a href="/#movies">🎬 Movies - View showtimes</a></li>
+                    <li><a href="#" onclick="history.back()">← Go Back - Return to previous page</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

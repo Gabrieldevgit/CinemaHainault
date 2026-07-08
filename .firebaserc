@@ -1,0 +1,13 @@
+{
+  "projects": {},
+  "targets": {
+    "cinematheo-86e22": {
+      "hosting": {
+        "cinematheo-86e22-5e8d0": [
+          "."
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
