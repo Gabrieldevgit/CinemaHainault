@@ -12,8 +12,9 @@ const STORAGE_KEYS = {
 };
 
 // Supabase configuration
-let supabase = null;
+let supabaseClient = null;
 let useSupabase = false;
+let reservationsChannel = null; // holds the active Realtime subscription, if any
 
 // Supabase credentials (replace with your actual credentials)
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';
@@ -109,10 +110,10 @@ const DataManager = {
     async initializeSupabase() {
         try {
             if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 
                 // Test connection by trying to read movies
-                const { data, error } = await supabase.from('movies').select('*').limit(1);
+                const { data, error } = await supabaseClient.from('movies').select('*').limit(1);
                 
                 if (error) throw error;
                 
@@ -120,6 +121,7 @@ const DataManager = {
                 Storage.set(STORAGE_KEYS.USE_SUPABASE, true);
                 console.log('Supabase connected successfully');
                 Utils.showToast('Connected to Supabase', 'success');
+                this.subscribeToRealtime();
                 return true;
             }
         } catch (error) {
@@ -131,12 +133,77 @@ const DataManager = {
         }
     },
 
+    // Listens for reservation inserts/deletes from ANY connected browser
+    // (including this one) and pushes the change into the seat map and
+    // admin dashboard live, without anyone needing to refresh.
+    subscribeToRealtime() {
+        if (!useSupabase || !supabaseClient || reservationsChannel) return;
+
+        reservationsChannel = supabaseClient
+            .channel('public:reservations')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'reservations' }, (payload) => {
+                const row = (payload.new && Object.keys(payload.new).length) ? payload.new : payload.old;
+                const reservation = this.fromDbReservation(row);
+                SeatManager.handleRealtimeReservationChange(reservation);
+                AdminManager.refreshIfOpen();
+            })
+            .subscribe((status) => {
+                if (status === 'SUBSCRIBED') console.log('Realtime: listening for reservation changes');
+            });
+    },
+
+    // ---- field mapping helpers -------------------------------------------
+    // Supabase/Postgres columns are snake_case; the rest of the app works in
+    // camelCase. Without this translation, reservation.movieId etc. would
+    // silently come back undefined the moment real credentials are used.
+    toDbMovie(movie) {
+        return {
+            id: movie.id, poster: movie.poster, title: movie.title, description: movie.description,
+            duration: movie.duration, genre: movie.genre, age_rating: movie.ageRating,
+            showtime: movie.showtime, price: movie.price
+        };
+    },
+    fromDbMovie(row) {
+        return {
+            id: row.id, poster: row.poster, title: row.title, description: row.description,
+            duration: row.duration, genre: row.genre, ageRating: row.age_rating,
+            showtime: row.showtime, price: row.price
+        };
+    },
+    toDbReservation(r) {
+        return {
+            id: r.id, movie_id: r.movieId, movie_title: r.movieTitle, seat: r.seat,
+            customer_name: r.customerName, customer_email: r.customerEmail, customer_phone: r.customerPhone,
+            purchase_date: r.purchaseDate, price: r.price
+        };
+    },
+    fromDbReservation(row) {
+        if (!row) return null;
+        return {
+            id: row.id, movieId: row.movie_id, movieTitle: row.movie_title, seat: row.seat,
+            customerName: row.customer_name, customerEmail: row.customer_email, customerPhone: row.customer_phone,
+            purchaseDate: row.purchase_date, price: row.price
+        };
+    },
+    toDbCustomer(c) {
+        return {
+            id: c.id, name: c.name, email: c.email, phone: c.phone,
+            reservation_history: c.reservationHistory, total_reservations: c.totalReservations
+        };
+    },
+    fromDbCustomer(row) {
+        return {
+            id: row.id, name: row.name, email: row.email, phone: row.phone,
+            reservationHistory: row.reservation_history || [], totalReservations: row.total_reservations || 0
+        };
+    },
+
     async getMovies() {
-        if (useSupabase && supabase) {
+        if (useSupabase && supabaseClient) {
             try {
-                const { data, error } = await supabase.from('movies').select('*');
+                const { data, error } = await supabaseClient.from('movies').select('*');
                 if (error) throw error;
-                return data && data.length > 0 ? data : DEFAULT_MOVIES;
+                return data && data.length > 0 ? data.map(this.fromDbMovie) : DEFAULT_MOVIES;
             } catch (error) {
                 console.warn('Supabase read failed, using LocalStorage:', error);
                 useSupabase = false;
@@ -147,13 +214,13 @@ const DataManager = {
     },
 
     async saveMovies(movies) {
-        if (useSupabase && supabase) {
+        if (useSupabase && supabaseClient) {
             try {
                 // Delete all existing movies
-                await supabase.from('movies').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                await supabaseClient.from('movies').delete().neq('id', '00000000-0000-0000-0000-000000000000');
                 
                 // Insert all movies
-                const { error } = await supabase.from('movies').insert(movies);
+                const { error } = await supabaseClient.from('movies').insert(movies.map(this.toDbMovie));
                 if (error) throw error;
                 return true;
             } catch (error) {
@@ -166,11 +233,11 @@ const DataManager = {
     },
 
     async getReservations() {
-        if (useSupabase && supabase) {
+        if (useSupabase && supabaseClient) {
             try {
-                const { data, error } = await supabase.from('reservations').select('*');
+                const { data, error } = await supabaseClient.from('reservations').select('*');
                 if (error) throw error;
-                return data || [];
+                return (data || []).map(this.fromDbReservation);
             } catch (error) {
                 console.warn('Supabase read failed, using LocalStorage:', error);
                 useSupabase = false;
@@ -180,31 +247,48 @@ const DataManager = {
         return Storage.get(STORAGE_KEYS.RESERVATIONS, []);
     },
 
-    async saveReservations(reservations) {
-        if (useSupabase && supabase) {
-            try {
-                // Delete all existing reservations
-                await supabase.from('reservations').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                
-                // Insert all reservations
-                const { error } = await supabase.from('reservations').insert(reservations);
-                if (error) throw error;
-                return true;
-            } catch (error) {
-                console.warn('Supabase write failed, using LocalStorage:', error);
-                useSupabase = false;
-                return Storage.set(STORAGE_KEYS.RESERVATIONS, reservations);
-            }
+    // Inserts exactly ONE reservation (one seat). This is what makes the
+    // database's UNIQUE(movie_id, seat) constraint meaningful: two people
+    // booking the same seat at the same instant now race on a single-row
+    // INSERT, and the loser gets a clean, catchable error (Postgres code
+    // 23505) instead of a full-table rewrite silently clobbering the other
+    // person's seat.
+    async addReservation(reservation) {
+        if (useSupabase && supabaseClient) {
+            const { error } = await supabaseClient.from('reservations').insert(this.toDbReservation(reservation));
+            if (error) throw error;
+            return true;
         }
-        return Storage.set(STORAGE_KEYS.RESERVATIONS, reservations);
+        // LocalStorage has no unique constraint, so enforce it here too.
+        const reservations = Storage.get(STORAGE_KEYS.RESERVATIONS, []);
+        const clash = reservations.some(r => r.movieId === reservation.movieId && r.seat === reservation.seat);
+        if (clash) {
+            const err = new Error('That seat is already reserved.');
+            err.code = '23505';
+            throw err;
+        }
+        reservations.push(reservation);
+        Storage.set(STORAGE_KEYS.RESERVATIONS, reservations);
+        return true;
+    },
+
+    async cancelReservationById(id) {
+        if (useSupabase && supabaseClient) {
+            const { error } = await supabaseClient.from('reservations').delete().eq('id', id);
+            if (error) throw error;
+            return true;
+        }
+        const reservations = Storage.get(STORAGE_KEYS.RESERVATIONS, []);
+        Storage.set(STORAGE_KEYS.RESERVATIONS, reservations.filter(r => r.id !== id));
+        return true;
     },
 
     async getCustomers() {
-        if (useSupabase && supabase) {
+        if (useSupabase && supabaseClient) {
             try {
-                const { data, error } = await supabase.from('customers').select('*');
+                const { data, error } = await supabaseClient.from('customers').select('*');
                 if (error) throw error;
-                return data || [];
+                return (data || []).map(this.fromDbCustomer);
             } catch (error) {
                 console.warn('Supabase read failed, using LocalStorage:', error);
                 useSupabase = false;
@@ -215,13 +299,13 @@ const DataManager = {
     },
 
     async saveCustomers(customers) {
-        if (useSupabase && supabase) {
+        if (useSupabase && supabaseClient) {
             try {
                 // Delete all existing customers
-                await supabase.from('customers').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+                await supabaseClient.from('customers').delete().neq('id', '00000000-0000-0000-0000-000000000000');
                 
                 // Insert all customers
-                const { error } = await supabase.from('customers').insert(customers);
+                const { error } = await supabaseClient.from('customers').insert(customers.map(this.toDbCustomer));
                 if (error) throw error;
                 return true;
             } catch (error) {
@@ -428,11 +512,59 @@ const SeatManager = {
 
         // Add click handlers
         layout.querySelectorAll('.seat.available').forEach(seat => {
-            seat.addEventListener('click', () => this.toggleSeat(seat));
+            this.attachSeatClickHandler(seat);
         });
 
         AppState.selectedSeats = [];
         this.updateSelectedSeatsDisplay();
+    },
+
+    attachSeatClickHandler(seatElement) {
+        seatElement.addEventListener('click', () => this.toggleSeat(seatElement));
+    },
+
+    // Called whenever a reservation is inserted or deleted anywhere (via
+    // Supabase Realtime) while this visitor has a movie's seat map open.
+    // Re-derives every seat's true status from the database and preserves
+    // whatever the visitor already had selected locally — unless someone
+    // else just grabbed one of those same seats first, in which case we
+    // bump it and tell them.
+    handleRealtimeReservationChange(reservation) {
+        if (!reservation || !AppState.selectedMovie || reservation.movieId !== AppState.selectedMovie.id) return;
+        const seatSection = document.getElementById('seatSection');
+        if (!seatSection || !seatSection.classList.contains('active')) return;
+        this.refreshSeatsPreservingSelection(AppState.selectedMovie);
+    },
+
+    async refreshSeatsPreservingSelection(movie) {
+        const layout = document.getElementById('seatingLayout');
+        if (!layout) return;
+
+        const reservedSeats = await Utils.getReservedSeats(movie.id);
+        const lostSeats = AppState.selectedSeats.filter(s => reservedSeats.includes(s));
+        AppState.selectedSeats = AppState.selectedSeats.filter(s => !reservedSeats.includes(s));
+
+        layout.innerHTML = SEAT_LAYOUT.map(row => `
+            <div class="seating-row">
+                ${row.map(seat => {
+                    const isReserved = reservedSeats.includes(seat);
+                    const isSelected = AppState.selectedSeats.includes(seat);
+                    const status = isReserved ? 'reserved' : (isSelected ? 'selected' : 'available');
+                    return `<div class="seat ${status}" data-seat="${seat}">${seat}</div>`;
+                }).join('')}
+            </div>
+        `).join('');
+
+        layout.querySelectorAll('.seat.available, .seat.selected').forEach(seat => {
+            this.attachSeatClickHandler(seat);
+        });
+
+        this.updateSelectedSeatsDisplay();
+
+        if (lostSeats.length > 0) {
+            const label = lostSeats.length > 1 ? 'Seats' : 'Seat';
+            Utils.showToast(`${label} ${lostSeats.join(', ')} just got taken by someone else — please choose again`, 'error');
+        }
     },
 
     toggleSeat(seatElement) {
@@ -487,46 +619,82 @@ const CheckoutManager = {
     },
 
     async processReservation(customerData) {
-        const reservation = {
-            id: Utils.generateId(),
-            movieId: AppState.selectedMovie.id,
-            movieTitle: AppState.selectedMovie.title,
-            seat: AppState.selectedSeats.join(', '),
-            customerName: customerData.fullName,
-            customerEmail: customerData.email,
-            customerPhone: customerData.phone,
-            purchaseDate: new Date().toISOString(),
-            price: AppState.selectedSeats.length * (AppState.selectedMovie?.price || SEAT_PRICE)
-        };
+        const purchaseDate = new Date().toISOString();
+        const pricePerSeat = AppState.selectedMovie?.price || SEAT_PRICE;
+        const groupId = Utils.generateId();
+        const seatsToBook = [...AppState.selectedSeats];
+        const createdReservations = [];
 
-        // Save reservation
-        const reservations = await DataManager.getReservations();
-        reservations.push(reservation);
-        await DataManager.saveReservations(reservations);
+        // One row per seat — this is what lets the database's
+        // UNIQUE(movie_id, seat) constraint actually catch two people
+        // grabbing the same seat at the same instant, instead of a single
+        // comma-joined "seat" string that silently didn't match anything
+        // on the seat map.
+        try {
+            for (const seat of seatsToBook) {
+                const reservation = {
+                    id: Utils.generateId(),
+                    groupId,
+                    movieId: AppState.selectedMovie.id,
+                    movieTitle: AppState.selectedMovie.title,
+                    seat,
+                    customerName: customerData.fullName,
+                    customerEmail: customerData.email,
+                    customerPhone: customerData.phone,
+                    purchaseDate,
+                    price: pricePerSeat
+                };
+                await DataManager.addReservation(reservation);
+                createdReservations.push(reservation);
+            }
+        } catch (error) {
+            // Roll back whatever DID succeed in this same checkout, so a
+            // customer is never charged for some seats but not others just
+            // because one seat in their group got taken a moment earlier.
+            for (const r of createdReservations) {
+                try { await DataManager.cancelReservationById(r.id); } catch (_) { /* best effort */ }
+            }
+            if (error.code === '23505') {
+                Utils.showToast('One of your seats was just taken by someone else. Please choose again.', 'error');
+            } else {
+                console.error('Reservation failed:', error);
+                Utils.showToast('Could not complete your reservation. Please try again.', 'error');
+            }
+            await SeatManager.renderSeats(AppState.selectedMovie);
+            Utils.showSection('seatSection');
+            return;
+        }
 
         // Update customer data
-        await this.updateCustomerData(customerData, reservation);
+        await this.updateCustomerData(customerData, createdReservations);
 
-        AppState.currentReservation = reservation;
-        this.showConfirmation(reservation);
+        AppState.currentReservation = {
+            id: groupId,
+            movieTitle: AppState.selectedMovie.title,
+            seats: seatsToBook,
+            purchaseDate,
+            price: pricePerSeat * seatsToBook.length
+        };
+        this.showConfirmation(AppState.currentReservation);
     },
 
-    async updateCustomerData(customerData, reservation) {
+    async updateCustomerData(customerData, reservations) {
         const customers = await DataManager.getCustomers();
         const existingCustomer = customers.find(c => c.email === customerData.email);
+        const newIds = reservations.map(r => r.id);
 
         if (existingCustomer) {
             existingCustomer.phone = customerData.phone;
-            existingCustomer.reservationHistory.push(reservation.id);
-            existingCustomer.totalReservations++;
+            existingCustomer.reservationHistory.push(...newIds);
+            existingCustomer.totalReservations += newIds.length;
         } else {
             customers.push({
                 id: Utils.generateId(),
                 name: customerData.fullName,
                 email: customerData.email,
                 phone: customerData.phone,
-                reservationHistory: [reservation.id],
-                totalReservations: 1
+                reservationHistory: newIds,
+                totalReservations: newIds.length
             });
         }
 
@@ -540,7 +708,7 @@ const CheckoutManager = {
         details.innerHTML = `
             <p><strong>Reservation ID:</strong> ${reservation.id}</p>
             <p><strong>Movie:</strong> ${reservation.movieTitle}</p>
-            <p><strong>Seats:</strong> ${reservation.seat}</p>
+            <p><strong>Seats:</strong> ${reservation.seats.join(', ')}</p>
             <p><strong>Date:</strong> ${Utils.formatDate(reservation.purchaseDate)}</p>
             <p><strong>Total Paid:</strong> ${Utils.formatCurrency(reservation.price)}</p>
         `;
@@ -669,14 +837,23 @@ const AdminManager = {
     },
 
     async cancelReservation(reservationId) {
-        const reservations = await DataManager.getReservations();
-        const index = reservations.findIndex(r => r.id === reservationId);
-        
-        if (index !== -1) {
-            reservations.splice(index, 1);
-            await DataManager.saveReservations(reservations);
+        try {
+            await DataManager.cancelReservationById(reservationId);
             await this.renderDashboard();
             Utils.showToast('Reservation cancelled successfully', 'success');
+        } catch (error) {
+            console.error('Cancel failed:', error);
+            Utils.showToast('Could not cancel reservation. Please try again.', 'error');
+        }
+    },
+
+    // Called from the Realtime subscription when a reservation changes
+    // anywhere. Only re-renders if the admin is actually looking at the
+    // dashboard right now, so a background tab isn't doing pointless work.
+    refreshIfOpen() {
+        const section = document.getElementById('adminDashboardSection');
+        if (section && section.classList.contains('active') && AppState.adminLoggedIn) {
+            this.renderDashboard();
         }
     },
 
@@ -727,7 +904,7 @@ const AdminManager = {
         });
     },
 
-    openMovieModal(movieId = null) {
+    async openMovieModal(movieId = null) {
         const modal = document.getElementById('adminModal');
         const form = document.getElementById('movieForm');
         const title = document.getElementById('modalTitle');
@@ -735,7 +912,8 @@ const AdminManager = {
         form.reset();
 
         if (movieId) {
-            const movie = DataManager.getMovies().find(m => m.id === movieId);
+            const movies = await DataManager.getMovies();
+            const movie = movies.find(m => m.id === movieId);
             if (movie) {
                 title.textContent = 'Edit Movie';
                 document.getElementById('movieId').value = movie.id;

@@ -144,7 +144,51 @@ CREATE TABLE customers (
 
 ---
 
-## Row Level Security (RLS) Policies
+## Realtime & Concurrency Safety
+
+This is what actually makes "only one customer can own a seat" true when
+multiple people are booking at once — and what makes the seat map update
+live in every open browser without a refresh.
+
+### Step 1: Run the migration
+
+After creating the tables above, run `supabase-realtime-setup.sql`
+(included in this repo) in **SQL Editor > New Query**. It does two things:
+
+1. Adds a `UNIQUE(movie_id, seat)` constraint on `reservations`, so the
+   database itself rejects a second booking for a seat that's already
+   taken — even if two browsers submit at the exact same millisecond.
+2. Enables Realtime replication on `reservations` (and `movies`), so
+   Supabase pushes every insert/delete out to connected clients instantly.
+
+### Step 2: How the app uses it
+
+- `app.js` inserts **one row per seat** (not one row per checkout), which
+  is what makes the unique constraint meaningful — it can only reject a
+  duplicate if seats are actually stored individually.
+- If a booking collides with the constraint, the app rolls back any other
+  seats from that same checkout, shows "One of your seats was just taken
+  by someone else," and sends the customer back to pick again.
+- Every connected browser subscribes to `postgres_changes` on
+  `reservations`. If you have the seat map open for a movie and someone
+  else books or cancels a seat for it, your screen updates immediately —
+  including bumping a seat you had selected but hadn't paid for yet.
+- The admin dashboard refreshes the same way if it's open when a change
+  comes in from anywhere (another admin, or a customer booking live).
+
+### Step 3: Verify it works
+
+1. Open the site in two different browser tabs (or one normal + one
+   incognito, so they don't share a session).
+2. In both tabs, open the same movie's seat selection at the same time.
+3. In Tab A, book seat `2A`. Tab B should show `2A` turn red within a
+   second or two, with no refresh.
+4. In the admin dashboard, cancel that reservation. Both tabs' seat maps
+   (and the dashboard stats) should update live.
+
+---
+
+
 
 Supabase uses Row Level Security (RLS) to control data access. For this cinema website, we'll allow public access since we don't have user authentication yet.
 
@@ -196,8 +240,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
 1. Open your website in a browser
 2. Open the browser console (F12)
 3. You should see:
-   - ✅ "Connected to Supabase" (if successful)
-   - ⚠️ "Using LocalStorage (Supabase unavailable)" (if credentials are wrong)
+   - "Connected to Supabase" (if successful)
+   - "Using LocalStorage (Supabase unavailable)" (if credentials are wrong)
 
 ### Step 3: Verify Data Sync
 
@@ -311,4 +355,4 @@ If you encounter issues:
 
 ---
 
-**Happy coding with Supabase! 🚀**
+**Happy coding with Supabase!**
