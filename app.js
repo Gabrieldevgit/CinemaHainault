@@ -157,9 +157,14 @@ const DataManager = {
             moviesChannel = supabaseClient
                 .channel('public:movies')
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'movies' }, async (payload) => {
-                    console.log('Realtime: movie change detected', payload.eventType);
-                    // Refresh movies display
-                    await MovieManager.renderMovies();
+                    console.log('Realtime: movie change detected', payload.eventType, payload);
+                    
+                    // Force refresh from Supabase to ensure we have the latest data
+                    const freshMovies = await DataManager.getMovies();
+                    
+                    // Refresh movies display with fresh data
+                    await MovieManager.renderMovies(freshMovies);
+                    
                     // Refresh admin dashboard if open
                     if (AppState.adminLoggedIn) {
                         await AdminManager.renderDashboard();
