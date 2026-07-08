@@ -14,7 +14,8 @@ const STORAGE_KEYS = {
 // Supabase configuration
 let supabaseClient = null;
 let useSupabase = false;
-let reservationsChannel = null; // holds the active Realtime subscription, if any
+let reservationsChannel = null; // holds the active Realtime subscription for reservations
+let moviesChannel = null; // holds the active Realtime subscription for movies
 
 // Supabase credentials (replace with your actual credentials)
 const SUPABASE_URL = 'https://nwmghyoijwundrugtwab.supabase.co';
@@ -150,6 +151,24 @@ const DataManager = {
             .subscribe((status) => {
                 if (status === 'SUBSCRIBED') console.log('Realtime: listening for reservation changes');
             });
+
+        // Also subscribe to movies changes for admin actions
+        if (!moviesChannel) {
+            moviesChannel = supabaseClient
+                .channel('public:movies')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'movies' }, async (payload) => {
+                    console.log('Realtime: movie change detected', payload.eventType);
+                    // Refresh movies display
+                    await MovieManager.renderMovies();
+                    // Refresh admin dashboard if open
+                    if (AppState.adminLoggedIn) {
+                        await AdminManager.renderDashboard();
+                    }
+                })
+                .subscribe((status) => {
+                    if (status === 'SUBSCRIBED') console.log('Realtime: listening for movie changes');
+                });
+        }
     },
 
     // ---- field mapping helpers -------------------------------------------
@@ -216,12 +235,26 @@ const DataManager = {
     async saveMovies(movies) {
         if (useSupabase && supabaseClient) {
             try {
-                // Delete all existing movies
-                await supabaseClient.from('movies').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                
-                // Insert all movies
-                const { error } = await supabaseClient.from('movies').insert(movies.map(this.toDbMovie));
-                if (error) throw error;
+                // Get existing movies from Supabase
+                const { data: existingMovies, error: fetchError } = await supabaseClient.from('movies').select('id');
+                if (fetchError) throw fetchError;
+
+                const existingIds = new Set(existingMovies?.map(m => m.id) || []);
+                const newIds = new Set(movies.map(m => m.id));
+
+                // Delete movies that are no longer in the list
+                const toDelete = [...existingIds].filter(id => !newIds.has(id));
+                if (toDelete.length > 0) {
+                    const { error: deleteError } = await supabaseClient.from('movies').delete().in('id', toDelete);
+                    if (deleteError) throw deleteError;
+                }
+
+                // Upsert all movies (insert or update)
+                for (const movie of movies) {
+                    const { error: upsertError } = await supabaseClient.from('movies').upsert(this.toDbMovie(movie));
+                    if (upsertError) throw upsertError;
+                }
+
                 return true;
             } catch (error) {
                 console.warn('Supabase write failed, using LocalStorage:', error);
@@ -301,12 +334,26 @@ const DataManager = {
     async saveCustomers(customers) {
         if (useSupabase && supabaseClient) {
             try {
-                // Delete all existing customers
-                await supabaseClient.from('customers').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-                
-                // Insert all customers
-                const { error } = await supabaseClient.from('customers').insert(customers.map(this.toDbCustomer));
-                if (error) throw error;
+                // Get existing customers from Supabase
+                const { data: existingCustomers, error: fetchError } = await supabaseClient.from('customers').select('id');
+                if (fetchError) throw fetchError;
+
+                const existingIds = new Set(existingCustomers?.map(c => c.id) || []);
+                const newIds = new Set(customers.map(c => c.id));
+
+                // Delete customers that are no longer in the list
+                const toDelete = [...existingIds].filter(id => !newIds.has(id));
+                if (toDelete.length > 0) {
+                    const { error: deleteError } = await supabaseClient.from('customers').delete().in('id', toDelete);
+                    if (deleteError) throw deleteError;
+                }
+
+                // Upsert all customers (insert or update)
+                for (const customer of customers) {
+                    const { error: upsertError } = await supabaseClient.from('customers').upsert(this.toDbCustomer(customer));
+                    if (upsertError) throw upsertError;
+                }
+
                 return true;
             } catch (error) {
                 console.warn('Supabase write failed, using LocalStorage:', error);

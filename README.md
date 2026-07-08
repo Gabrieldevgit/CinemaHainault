@@ -56,12 +56,14 @@ A modern, responsive cinema ticket reservation web application with a comprehens
 ### File Structure
 ```
 Le Cinéma Hainault/
-├── index.html          # Main HTML structure
-├── styles.css          # All styling and animations
-├── app.js              # Application logic
-├── SUPABASE_SETUP.md   # Comprehensive Supabase setup guide
-├── firebase.json       # Firebase hosting configuration
-└── README.md           # Documentation
+├── index.html              # Main HTML structure
+├── styles.css              # All styling and animations
+├── app.js                  # Application logic
+├── SUPABASE_SETUP.md       # Comprehensive Supabase setup guide
+├── .github/
+│   └── workflows/
+│       └── deploy.yml      # GitHub Pages deployment workflow
+└── README.md               # Documentation
 ```
 
 ## Admin Credentials
@@ -185,21 +187,30 @@ Modify CSS variables in `styles.css` under `:root` to change the color palette.
 
 ## Deployment
 
-### Firebase Hosting (Recommended)
+### GitHub Pages (Recommended)
 
-This project is configured for Firebase Hosting deployment (for static file hosting only).
+This project uses GitHub Pages for free static hosting with automatic deployment via GitHub Actions.
 
 #### Prerequisites
-- Node.js and npm installed
-- Firebase CLI installed: `npm install -g firebase-tools`
+- GitHub account
+- Repository: https://github.com/Gabrieldevgit/CinemaHainault
 
-#### Deployment Steps
-1. Login to Firebase: `firebase login`
-2. Deploy to Firebase: `firebase deploy --project cinematheo-86e22`
+#### Automatic Deployment
+The project includes a GitHub Actions workflow (`.github/workflows/deploy.yml`) that automatically deploys to GitHub Pages when you push to the `main` branch.
 
-The application will be deployed to: `https://cinematheo-86e22.web.app`
+#### Manual Deployment
+1. Push your changes to the `main` branch
+2. Go to the Actions tab in your GitHub repository
+3. The "Deploy to GitHub Pages" workflow will run automatically
+4. Your site will be available at: `https://gabrieldevgit.github.io/CinemaHainault/`
 
-**Note:** Firebase is only used for hosting the static files. The database is Supabase.
+#### Enabling GitHub Pages (First Time Setup)
+1. Go to your repository on GitHub
+2. Navigate to **Settings** > **Pages**
+3. Under **Source**, select **GitHub Actions**
+4. The workflow will handle the rest
+
+**Note:** GitHub Pages hosts the static files. The database is Supabase.
 
 ## Security Notes
 
