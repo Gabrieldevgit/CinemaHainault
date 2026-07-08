@@ -419,6 +419,7 @@ const Utils = {
     },
 
     formatCurrency(amount) {
+        if (amount === null || amount === undefined) return '$0.00';
         return `$${amount.toFixed(2)}`;
     },
 
@@ -992,14 +993,14 @@ const AdminManager = {
         const movieId = formData.get('movieId');
 
         const movieData = {
-            poster: formData.get('moviePoster'),
-            title: formData.get('movieTitle'),
-            description: formData.get('movieDescription'),
-            duration: formData.get('movieDuration'),
-            genre: formData.get('movieGenre'),
-            ageRating: formData.get('movieAgeRating'),
-            showtime: formData.get('movieShowtime'),
-            price: parseFloat(formData.get('moviePrice'))
+            poster: formData.get('moviePoster') || 'https://via.placeholder.com/300x400?text=No+Poster',
+            title: formData.get('movieTitle') || 'Untitled Movie',
+            description: formData.get('movieDescription') || '',
+            duration: formData.get('movieDuration') || '120 min',
+            genre: formData.get('movieGenre') || 'General',
+            ageRating: formData.get('movieAgeRating') || 'PG',
+            showtime: formData.get('movieShowtime') || '14:00',
+            price: parseFloat(formData.get('moviePrice')) || 12.00
         };
 
         if (movieId) {
