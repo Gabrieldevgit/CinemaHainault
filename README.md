@@ -1,4 +1,4 @@
-# CinemaThéo - Cinema Ticket Reservation Website
+# Le Cinéma Hainault - Cinema Ticket Reservation Website
 
 A modern, responsive cinema ticket reservation web application with a comprehensive admin panel.
 
@@ -55,7 +55,7 @@ A modern, responsive cinema ticket reservation web application with a comprehens
 
 ### File Structure
 ```
-CinemaThéo/
+Le Cinéma Hainault/
 ├── index.html          # Main HTML structure
 ├── styles.css          # All styling and animations
 ├── app.js              # Application logic

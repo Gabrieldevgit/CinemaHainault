@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CinemaThéo - Ticket Reservation</title>
+    <title>Le Cinéma Hainault - Ticket Reservation</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -11,7 +11,10 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <h1 class="logo">🎬 CinemaThéo</h1>
+            <h1 class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 6L3 11l1.9 7.5 17.2-5L20.2 6z"/><path d="M6.5 8.5l3 3M11.5 7l3 3M16.5 5.5l3 3"/></svg>
+                Le Cinéma Hainault
+            </h1>
             <div class="nav-actions">
                 <button id="homeBtn" class="nav-btn">Home</button>
                 <button id="adminBtn" class="nav-btn admin-btn">Admin</button>
@@ -110,7 +113,9 @@
         <!-- Confirmation Section -->
         <section id="confirmationSection" class="section">
             <div class="confirmation-container">
-                <div class="success-icon">✓</div>
+                <div class="success-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                </div>
                 <h2>Reservation Confirmed!</h2>
                 <div id="confirmationDetails" class="confirmation-details"></div>
                 <div id="qrCode" class="qr-code"></div>
@@ -159,32 +164,32 @@
                 <div id="overviewTab" class="tab-content active">
                     <div class="stats-grid">
                         <div class="stat-card">
-                            <div class="stat-icon">🎫</div>
+                            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a2 2 0 012-2h16a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2a2 2 0 000-4V9z"/><path d="M9 7v10"/></svg></div>
                             <div class="stat-value" id="totalReservations">0</div>
                             <div class="stat-label">Total Reservations</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">💺</div>
+                            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10V6a2 2 0 012-2h8a2 2 0 012 2v4"/><path d="M4 10h16v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6z"/><path d="M6 18v2M18 18v2"/></svg></div>
                             <div class="stat-value" id="availableSeats">0</div>
                             <div class="stat-label">Available Seats</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">🔒</div>
+                            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
                             <div class="stat-value" id="occupiedSeats">0</div>
                             <div class="stat-label">Occupied Seats</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">🎬</div>
+                            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M2 7l3-4h4l-3 4M9 7l3-4h4l-3 4M16 7l3-4h3l-3 4"/></svg></div>
                             <div class="stat-value" id="totalMovies">0</div>
                             <div class="stat-label">Movies Showing</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">💰</div>
+                            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2.5 0 012.5-1.5c1.5 0 2.5.8 2.5 2s-1 1.7-2.5 2-2.5.8-2.5 2 1 2 2.5 2a2.5 2.5 0 002.5-1.5"/></svg></div>
                             <div class="stat-value" id="totalRevenue">$0</div>
                             <div class="stat-label">Total Revenue</div>
                         </div>
                         <div class="stat-card">
-                            <div class="stat-icon">📊</div>
+                            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg></div>
                             <div class="stat-value" id="occupancyRate">0%</div>
                             <div class="stat-label">Seat Occupancy</div>
                         </div>

@@ -250,7 +250,7 @@ const DataManager = {
         await this.initializeSupabase();
         
         if (!Storage.get(STORAGE_KEYS.MOVIES)) {
-            this.saveMovies(DEFAULT_MOVIES);
+            await this.saveMovies(DEFAULT_MOVIES);
         }
     }
 };
@@ -377,11 +377,11 @@ const MovieManager = {
                 <div class="movie-detail-info">
                     <h3>${movie.title}</h3>
                     <div class="movie-detail-meta">
-                        <span class="meta-item">🎬 ${movie.genre}</span>
-                        <span class="meta-item">⏱️ ${movie.duration}</span>
-                        <span class="meta-item">🔞 ${movie.ageRating}</span>
-                        <span class="meta-item">🕐 ${Utils.formatTime(movie.showtime)}</span>
-                        <span class="meta-item">💰 ${Utils.formatCurrency(movie.price)}</span>
+                        <span class="meta-item">${movie.genre}</span>
+                        <span class="meta-item">${movie.duration}</span>
+                        <span class="meta-item">${movie.ageRating}</span>
+                        <span class="meta-item">${Utils.formatTime(movie.showtime)}</span>
+                        <span class="meta-item">${Utils.formatCurrency(movie.price)}</span>
                     </div>
                     <p class="movie-detail-description">${movie.description}</p>
                     <button class="select-seats-btn" id="selectSeatsBtn">Select Seats</button>
@@ -1047,18 +1047,39 @@ function initializeEventListeners() {
 // ==================== INITIALIZATION ====================
 
 async function initializeApp() {
-    // Initialize data
-    await DataManager.initializeData();
+    try {
+        // Initialize data
+        await DataManager.initializeData();
 
-    // Check admin session
-    AdminManager.checkSession();
+        // Check admin session
+        AdminManager.checkSession();
 
-    // Render initial movies
-    await MovieManager.renderMovies();
+        // Render initial movies
+        await MovieManager.renderMovies();
 
-    // Initialize event listeners
-    initializeEventListeners();
+        // Initialize event listeners
+        initializeEventListeners();
+    } catch (error) {
+        // Surface the failure instead of leaving a silent blank page.
+        // Open the browser console (F12) to see the full error and stack trace.
+        console.error('Le Cinéma Hainault failed to start:', error);
+        const grid = document.getElementById('moviesGrid');
+        if (grid) {
+            grid.innerHTML = `<div class="loading" style="color:#F44336;">
+                Something went wrong while loading the site. Open the browser console (F12) for details, then refresh the page.
+            </div>`;
+        }
+    }
 }
 
 // Start the application when DOM is ready
 document.addEventListener('DOMContentLoaded', initializeApp);
+
+// Catch any error that isn't already caught above (e.g. thrown outside
+// initializeApp, or from an event handler) so nothing fails completely silently.
+window.addEventListener('error', (e) => {
+    console.error('Unhandled error in Le Cinéma Hainault:', e.error || e.message);
+});
+window.addEventListener('unhandledrejection', (e) => {
+    console.error('Unhandled promise rejection in Le Cinéma Hainault:', e.reason);
+});

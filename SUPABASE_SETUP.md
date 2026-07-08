@@ -1,6 +1,6 @@
-# Supabase Setup Guide for CinemaThéo
+# Supabase Setup Guide for Le Cinéma Hainault
 
-This guide will walk you through setting up Supabase for the CinemaThéo cinema ticket reservation website. Supabase is a free, open-source alternative to Firebase that doesn't require billing setup.
+This guide will walk you through setting up Supabase for Le Cinéma Hainault, a cinema ticket reservation website. Supabase is a free, open-source alternative to Firebase that doesn't require billing setup.
 
 ## Table of Contents
 1. [What is Supabase?](#what-is-supabase)

@@ -48,6 +48,15 @@ body {
     font-size: 1.5rem;
     font-weight: bold;
     color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
 }
 
 .nav-actions {
@@ -534,6 +543,11 @@ body {
     text-align: center;
 }
 
+.success-icon svg {
+    width: 40px;
+    height: 40px;
+}
+
 .success-icon {
     width: 80px;
     height: 80px;
@@ -700,8 +714,13 @@ body {
 }
 
 .stat-icon {
-    font-size: 2.5rem;
     margin-bottom: 0.5rem;
+    color: var(--primary);
+}
+
+.stat-icon svg {
+    width: 32px;
+    height: 32px;
 }
 
 .stat-value {
