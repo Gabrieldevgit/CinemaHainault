@@ -17,8 +17,8 @@ let useSupabase = false;
 let reservationsChannel = null; // holds the active Realtime subscription, if any
 
 // Supabase credentials (replace with your actual credentials)
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://nwmghyoijwundrugtwab.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53bWdoeW9pand1bmRydWd0d2FiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM0NTExOTksImV4cCI6MjA5OTAyNzE5OX0.bUSObTntZXKiJOL9VoNk6IlpoL0rqzPyQnvZxPX9Nr4';
 
 // Seat layout configuration
 const SEAT_LAYOUT = [
