@@ -385,7 +385,8 @@ const DataManager = {
         // Try Supabase first, fall back to LocalStorage
         await this.initializeSupabase();
         
-        if (!Storage.get(STORAGE_KEYS.MOVIES)) {
+        // Only initialize with defaults if Supabase is not connected AND LocalStorage is empty
+        if (!useSupabase && !Storage.get(STORAGE_KEYS.MOVIES)) {
             await this.saveMovies(DEFAULT_MOVIES);
         }
     }
