@@ -8,7 +8,8 @@ const STORAGE_KEYS = {
     RESERVATIONS: 'cinema_reservations',
     CUSTOMERS: 'cinema_customers',
     ADMIN_SESSION: 'cinema_admin_session',
-    USE_SUPABASE: 'cinema_use_supabase'
+    USE_SUPABASE: 'cinema_use_supabase',
+    LANG: 'cinema_lang'
 };
 
 // Supabase configuration
@@ -47,6 +48,157 @@ const DEFAULT_POSTER_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURICompone
     '<text x="150" y="225" font-family="sans-serif" font-size="18" fill="#666" text-anchor="middle">No Poster</text>' +
     '</svg>'
 );
+
+// ==================== INTERNATIONALIZATION (EN / FR) ====================
+// Covers the app's static UI chrome and dynamic messages (toasts, dialogs,
+// generated labels). Movie content itself (title/description/genre as
+// entered by an admin) is NOT auto-translated — only the interface is.
+
+let currentLang = 'en';
+
+const TRANSLATIONS = {
+    en: {
+        brandName: 'Le Cinéma Hainault',
+        navHome: 'Home', navAdmin: 'Admin', langToggle: 'FR',
+        nowShowing: 'Now Showing', searchPlaceholder: 'Search movies...', allGenres: 'All Genres',
+        genreAction: 'Action', genreComedy: 'Comedy', genreDrama: 'Drama', genreHorror: 'Horror',
+        genreAnimation: 'Animation', genreSciFi: 'Sci-Fi', genreRomance: 'Romance', genreThriller: 'Thriller',
+        backToMovies: '← Back to Movies', backToMovie: '← Back to Movie', backToSeats: '← Back to Seats',
+        screenLabel: 'SCREEN',
+        seatAvailable: 'Available', seatSelected: 'Selected', seatReserved: 'Reserved', seatDisabled: 'Disabled',
+        selectedSeatsLabel: 'Selected Seats:', noneLabel: 'None', totalLabel: 'Total:',
+        proceedToCheckout: 'Proceed to Checkout', selectSeatsBtn: 'Select Seats',
+        completeReservation: 'Complete Your Reservation',
+        labelMovie: 'Movie:', labelShowtime: 'Showtime:', labelSeats: 'Seats:', labelTotal: 'Total:',
+        labelReservationId: 'Reservation ID:', labelDate: 'Date:', labelTotalPaid: 'Total Paid:',
+        fullNameLabel: 'Full Name *', emailLabel: 'Email *', phoneLabel: 'Phone Number *',
+        confirmReservation: 'Confirm Reservation',
+        reservationConfirmedTitle: 'Reservation Confirmed!', printTicket: 'Print Ticket', downloadTicket: 'Download Ticket', newReservation: 'Make New Reservation',
+        adminLoginTitle: 'Admin Login', usernameLabel: 'Username', passwordLabel: 'Password',
+        loginBtn: 'Login', cancelBtn: 'Cancel',
+        adminDashboardTitle: 'Admin Dashboard', logoutBtn: 'Logout',
+        tabOverview: 'Overview', tabReservations: 'Reservations', tabMovies: 'Movies', tabCustomers: 'Customers',
+        statTotalReservations: 'Total Reservations', statAvailableSeats: 'Available Seats',
+        statOccupiedSeats: 'Occupied Seats', statMoviesShowing: 'Movies Showing',
+        statTotalRevenue: 'Total Revenue', statSeatOccupancy: 'Seat Occupancy',
+        reservationsTitle: 'Reservations', exportCsv: 'Export CSV',
+        thReservationId: 'Reservation ID', thCustomer: 'Customer', thEmail: 'Email', thPhone: 'Phone',
+        thMovie: 'Movie', thSeat: 'Seat', thDate: 'Date', thActions: 'Actions',
+        moviesTitle: 'Movies', addMovie: 'Add Movie',
+        customersTitle: 'Customers', thName: 'Name', thTotalReservations: 'Total Reservations', thHistory: 'History',
+        addMovieTitle: 'Add Movie', editMovieTitle: 'Edit Movie',
+        posterLabel: 'Poster', posterUrlHint: '— or paste a URL below —',
+        titleLabel: 'Title *', descriptionLabel: 'Description *', durationLabel: 'Duration *',
+        genreLabel: 'Genre *', selectGenre: 'Select Genre', ageRatingLabel: 'Age Rating *', selectRating: 'Select Rating',
+        showtimeLabel: 'Showtime *', priceLabel: 'Price ($) *', saveMovie: 'Save Movie',
+        confirmActionTitle: 'Confirm Action', confirmActionDefault: 'Are you sure you want to proceed?', confirmBtn: 'Confirm',
+        confirmCancelReservation: 'Are you sure you want to cancel this reservation?',
+        confirmDeleteMovie: 'Are you sure you want to delete this movie?',
+        noMoviesShowing: 'No movies currently showing', noReservationsYet: 'No reservations yet',
+        noCustomersYet: 'No customers yet', noMoviesAvailable: 'No movies available',
+        toastSupabaseConnected: 'Connected to Supabase', toastUsingLocalStorage: 'Using LocalStorage (Supabase unavailable)',
+        toastSeatWord: 'Seat', toastSeatsWord: 'Seats', toastJustTakenSuffix: 'just got taken by someone else — please choose again',
+        toastOneSeatTaken: 'One of your seats was just taken by someone else. Please choose again.',
+        toastReservationFailed: 'Could not complete your reservation. Please try again.',
+        toastReservationConfirmed: 'Reservation confirmed successfully!',
+        toastLoggedOut: 'Logged out successfully', toastSessionExpired: 'Session expired due to inactivity',
+        toastReservationCancelled: 'Reservation cancelled successfully', toastCancelFailed: 'Could not cancel reservation. Please try again.',
+        toastMovieUpdated: 'Movie updated successfully', toastMovieAdded: 'Movie added successfully',
+        toastDeleteFailed: 'Could not delete movie. Please try again.', toastMovieDeleted: 'Movie deleted successfully',
+        toastNoReservationsExport: 'No reservations to export', toastExported: 'Reservations exported successfully',
+        toastLoginSuccess: 'Login successful', toastInvalidLogin: 'Invalid username or password.',
+        toastChooseImage: 'Please choose an image file', toastImageTooLarge: 'Image is too large (max 5MB)',
+        toastImageReadError: 'Could not read that image file'
+    },
+    fr: {
+        brandName: 'Le Cinéma Hainault',
+        navHome: 'Accueil', navAdmin: 'Admin', langToggle: 'EN',
+        nowShowing: "À l'affiche", searchPlaceholder: 'Rechercher un film...', allGenres: 'Tous les genres',
+        genreAction: 'Action', genreComedy: 'Comédie', genreDrama: 'Drame', genreHorror: 'Horreur',
+        genreAnimation: 'Animation', genreSciFi: 'Science-fiction', genreRomance: 'Romance', genreThriller: 'Thriller',
+        backToMovies: '← Retour aux films', backToMovie: '← Retour au film', backToSeats: '← Retour aux sièges',
+        screenLabel: 'ÉCRAN',
+        seatAvailable: 'Disponible', seatSelected: 'Sélectionné', seatReserved: 'Réservé', seatDisabled: 'Désactivé',
+        selectedSeatsLabel: 'Sièges sélectionnés :', noneLabel: 'Aucun', totalLabel: 'Total :',
+        proceedToCheckout: 'Procéder au paiement', selectSeatsBtn: 'Choisir les sièges',
+        completeReservation: 'Finalisez votre réservation',
+        labelMovie: 'Film :', labelShowtime: 'Séance :', labelSeats: 'Sièges :', labelTotal: 'Total :',
+        labelReservationId: 'No de réservation :', labelDate: 'Date :', labelTotalPaid: 'Total payé :',
+        fullNameLabel: 'Nom complet *', emailLabel: 'Courriel *', phoneLabel: 'Numéro de téléphone *',
+        confirmReservation: 'Confirmer la réservation',
+        reservationConfirmedTitle: 'Réservation confirmée !', printTicket: 'Imprimer le billet', downloadTicket: 'Télécharger le billet', newReservation: 'Faire une nouvelle réservation',
+        adminLoginTitle: 'Connexion administrateur', usernameLabel: "Nom d'utilisateur", passwordLabel: 'Mot de passe',
+        loginBtn: 'Se connecter', cancelBtn: 'Annuler',
+        adminDashboardTitle: 'Tableau de bord administrateur', logoutBtn: 'Déconnexion',
+        tabOverview: 'Aperçu', tabReservations: 'Réservations', tabMovies: 'Films', tabCustomers: 'Clients',
+        statTotalReservations: 'Total des réservations', statAvailableSeats: 'Sièges disponibles',
+        statOccupiedSeats: 'Sièges occupés', statMoviesShowing: "Films à l'affiche",
+        statTotalRevenue: 'Revenu total', statSeatOccupancy: "Taux d'occupation",
+        reservationsTitle: 'Réservations', exportCsv: 'Exporter en CSV',
+        thReservationId: 'No de réservation', thCustomer: 'Client', thEmail: 'Courriel', thPhone: 'Téléphone',
+        thMovie: 'Film', thSeat: 'Siège', thDate: 'Date', thActions: 'Actions',
+        moviesTitle: 'Films', addMovie: 'Ajouter un film',
+        customersTitle: 'Clients', thName: 'Nom', thTotalReservations: 'Total des réservations', thHistory: 'Historique',
+        addMovieTitle: 'Ajouter un film', editMovieTitle: 'Modifier le film',
+        posterLabel: 'Affiche', posterUrlHint: '— ou collez une URL ci-dessous —',
+        titleLabel: 'Titre *', descriptionLabel: 'Description *', durationLabel: 'Durée *',
+        genreLabel: 'Genre *', selectGenre: 'Choisir un genre', ageRatingLabel: 'Classification *', selectRating: 'Choisir une classification',
+        showtimeLabel: 'Heure de la séance *', priceLabel: 'Prix ($) *', saveMovie: 'Enregistrer le film',
+        confirmActionTitle: "Confirmer l'action", confirmActionDefault: 'Êtes-vous sûr de vouloir continuer ?', confirmBtn: 'Confirmer',
+        confirmCancelReservation: 'Êtes-vous sûr de vouloir annuler cette réservation ?',
+        confirmDeleteMovie: 'Êtes-vous sûr de vouloir supprimer ce film ?',
+        noMoviesShowing: "Aucun film à l'affiche actuellement", noReservationsYet: 'Aucune réservation pour le moment',
+        noCustomersYet: 'Aucun client pour le moment', noMoviesAvailable: 'Aucun film disponible',
+        toastSupabaseConnected: 'Connecté à Supabase', toastUsingLocalStorage: 'Utilisation du stockage local (Supabase indisponible)',
+        toastSeatWord: 'Le siège', toastSeatsWord: 'Les sièges', toastJustTakenSuffix: "viennent d'être pris par quelqu'un d'autre — veuillez choisir à nouveau",
+        toastOneSeatTaken: "Un de vos sièges vient d'être pris par quelqu'un d'autre. Veuillez choisir à nouveau.",
+        toastReservationFailed: 'Impossible de compléter votre réservation. Veuillez réessayer.',
+        toastReservationConfirmed: 'Réservation confirmée avec succès !',
+        toastLoggedOut: 'Déconnexion réussie', toastSessionExpired: "Session expirée en raison de l'inactivité",
+        toastReservationCancelled: 'Réservation annulée avec succès', toastCancelFailed: "Impossible d'annuler la réservation. Veuillez réessayer.",
+        toastMovieUpdated: 'Film mis à jour avec succès', toastMovieAdded: 'Film ajouté avec succès',
+        toastDeleteFailed: 'Impossible de supprimer le film. Veuillez réessayer.', toastMovieDeleted: 'Film supprimé avec succès',
+        toastNoReservationsExport: 'Aucune réservation à exporter', toastExported: 'Réservations exportées avec succès',
+        toastLoginSuccess: 'Connexion réussie', toastInvalidLogin: "Nom d'utilisateur ou mot de passe invalide.",
+        toastChooseImage: 'Veuillez choisir un fichier image', toastImageTooLarge: "L'image est trop grande (max 5 Mo)",
+        toastImageReadError: 'Impossible de lire ce fichier image'
+    }
+};
+
+function t(key) {
+    return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key]) || TRANSLATIONS.en[key] || key;
+}
+
+// Applies translations to every static element carrying a data-i18n /
+// data-i18n-placeholder attribute. Called on load and on every language
+// switch. Dynamic content generated in JS re-translates itself naturally
+// because it calls t() at render time.
+function applyStaticTranslations() {
+    document.documentElement.lang = currentLang;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+        el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
+    });
+    const langBtn = document.getElementById('langToggleBtn');
+    if (langBtn) langBtn.textContent = t('langToggle');
+}
+
+// Re-renders whichever section is currently visible so JS-generated text
+// (toasts aside) picks up the new language immediately, without a refresh.
+async function refreshCurrentView() {
+    const active = document.querySelector('.section.active');
+    if (!active) return;
+    switch (active.id) {
+        case 'homeSection': await MovieManager.renderMovies(); break;
+        case 'movieDetailSection': if (AppState.selectedMovie) MovieManager.showMovieDetail(AppState.selectedMovie); break;
+        case 'seatSection': if (AppState.selectedMovie) await SeatManager.renderSeats(AppState.selectedMovie); break;
+        case 'checkoutSection': CheckoutManager.renderCheckout(); break;
+        case 'confirmationSection': if (AppState.currentReservation) CheckoutManager.showConfirmation(AppState.currentReservation); break;
+        case 'adminDashboardSection': if (AppState.adminLoggedIn) await AdminManager.renderDashboard(); break;
+    }
+}
 
 const DEFAULT_MOVIES = [
     {
@@ -132,7 +284,7 @@ const DataManager = {
                 useSupabase = true;
                 Storage.set(STORAGE_KEYS.USE_SUPABASE, true);
                 console.log('Supabase connected successfully');
-                Utils.showToast('Connected to Supabase', 'success');
+                Utils.showToast(t('toastSupabaseConnected'), 'success');
                 this.subscribeToRealtime();
                 return true;
             }
@@ -140,7 +292,7 @@ const DataManager = {
             console.warn('Supabase connection failed, falling back to LocalStorage:', error);
             useSupabase = false;
             Storage.set(STORAGE_KEYS.USE_SUPABASE, false);
-            Utils.showToast('Using LocalStorage (Supabase unavailable)', 'warning');
+            Utils.showToast(t('toastUsingLocalStorage'), 'warning');
             return false;
         }
     },
@@ -518,7 +670,7 @@ const MovieManager = {
         const grid = document.getElementById('moviesGrid');
         
         if (allMovies.length === 0) {
-            grid.innerHTML = '<p class="loading">No movies currently showing</p>';
+            grid.innerHTML = `<p class="loading">${t('noMoviesShowing')}</p>`;
             return;
         }
 
@@ -565,7 +717,7 @@ const MovieManager = {
                         <span class="meta-item">${Utils.formatCurrency(movie.price)}</span>
                     </div>
                     <p class="movie-detail-description">${movie.description}</p>
-                    <button class="select-seats-btn" id="selectSeatsBtn">Select Seats</button>
+                    <button class="select-seats-btn" id="selectSeatsBtn">${t('selectSeatsBtn')}</button>
                 </div>
             </div>
         `;
@@ -659,8 +811,8 @@ const SeatManager = {
         this.updateSelectedSeatsDisplay();
 
         if (lostSeats.length > 0) {
-            const label = lostSeats.length > 1 ? 'Seats' : 'Seat';
-            Utils.showToast(`${label} ${lostSeats.join(', ')} just got taken by someone else — please choose again`, 'error');
+            const label = lostSeats.length > 1 ? t('toastSeatsWord') : t('toastSeatWord');
+            Utils.showToast(`${label} ${lostSeats.join(', ')} ${t('toastJustTakenSuffix')}`, 'error');
         }
     },
 
@@ -686,7 +838,7 @@ const SeatManager = {
         const proceedBtn = document.getElementById('proceedToCheckoutBtn');
 
         if (AppState.selectedSeats.length === 0) {
-            display.textContent = 'None';
+            display.textContent = t('noneLabel');
             total.textContent = '0';
             proceedBtn.disabled = true;
         } else {
@@ -706,10 +858,10 @@ const CheckoutManager = {
         const totalPrice = AppState.selectedSeats.length * (AppState.selectedMovie?.price || SEAT_PRICE);
 
         summary.innerHTML = `
-            <p><strong>Movie:</strong> ${AppState.selectedMovie?.title}</p>
-            <p><strong>Showtime:</strong> ${Utils.formatTime(AppState.selectedMovie?.showtime)}</p>
-            <p><strong>Seats:</strong> ${AppState.selectedSeats.join(', ')}</p>
-            <p><strong>Total:</strong> ${Utils.formatCurrency(totalPrice)}</p>
+            <p><strong>${t('labelMovie')}</strong> ${AppState.selectedMovie?.title}</p>
+            <p><strong>${t('labelShowtime')}</strong> ${Utils.formatTime(AppState.selectedMovie?.showtime)}</p>
+            <p><strong>${t('labelSeats')}</strong> ${AppState.selectedSeats.join(', ')}</p>
+            <p><strong>${t('labelTotal')}</strong> ${Utils.formatCurrency(totalPrice)}</p>
         `;
 
         Utils.showSection('checkoutSection');
@@ -752,10 +904,10 @@ const CheckoutManager = {
                 try { await DataManager.cancelReservationById(r.id); } catch (_) { /* best effort */ }
             }
             if (error.code === '23505') {
-                Utils.showToast('One of your seats was just taken by someone else. Please choose again.', 'error');
+                Utils.showToast(t('toastOneSeatTaken'), 'error');
             } else {
                 console.error('Reservation failed:', error);
-                Utils.showToast('Could not complete your reservation. Please try again.', 'error');
+                Utils.showToast(t('toastReservationFailed'), 'error');
             }
             await SeatManager.renderSeats(AppState.selectedMovie);
             Utils.showSection('seatSection');
@@ -803,18 +955,18 @@ const CheckoutManager = {
         const qrCode = document.getElementById('qrCode');
 
         details.innerHTML = `
-            <p><strong>Reservation ID:</strong> ${reservation.id}</p>
-            <p><strong>Movie:</strong> ${reservation.movieTitle}</p>
-            <p><strong>Seats:</strong> ${reservation.seats.join(', ')}</p>
-            <p><strong>Date:</strong> ${Utils.formatDate(reservation.purchaseDate)}</p>
-            <p><strong>Total Paid:</strong> ${Utils.formatCurrency(reservation.price)}</p>
+            <p><strong>${t('labelReservationId')}</strong> ${reservation.id}</p>
+            <p><strong>${t('labelMovie')}</strong> ${reservation.movieTitle}</p>
+            <p><strong>${t('labelSeats')}</strong> ${reservation.seats.join(', ')}</p>
+            <p><strong>${t('labelDate')}</strong> ${Utils.formatDate(reservation.purchaseDate)}</p>
+            <p><strong>${t('labelTotalPaid')}</strong> ${Utils.formatCurrency(reservation.price)}</p>
         `;
 
         // Generate QR code using a simple API
         qrCode.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(JSON.stringify(reservation))}" alt="QR Code">`;
 
         Utils.showSection('confirmationSection');
-        Utils.showToast('Reservation confirmed successfully!', 'success');
+        Utils.showToast(t('toastReservationConfirmed'), 'success');
     },
 
     reset() {
@@ -847,7 +999,7 @@ const AdminManager = {
         AppState.adminLoggedIn = false;
         this.clearSessionTimeout();
         Utils.showSection('homeSection');
-        Utils.showToast('Logged out successfully', 'success');
+        Utils.showToast(t('toastLoggedOut'), 'success');
     },
 
     checkSession() {
@@ -864,7 +1016,7 @@ const AdminManager = {
         this.clearSessionTimeout();
         AppState.adminSessionTimeout = setTimeout(() => {
             this.logout();
-            Utils.showToast('Session expired due to inactivity', 'error');
+            Utils.showToast(t('toastSessionExpired'), 'error');
         }, 30 * 60 * 1000); // 30 minutes
     },
 
@@ -905,7 +1057,7 @@ const AdminManager = {
         const tbody = document.querySelector('#reservationsTable tbody');
 
         if (reservations.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No reservations yet</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">${t('noReservationsYet')}</td></tr>`;
             return;
         }
 
@@ -937,10 +1089,10 @@ const AdminManager = {
         try {
             await DataManager.cancelReservationById(reservationId);
             await this.renderDashboard();
-            Utils.showToast('Reservation cancelled successfully', 'success');
+            Utils.showToast(t('toastReservationCancelled'), 'success');
         } catch (error) {
             console.error('Cancel failed:', error);
-            Utils.showToast('Could not cancel reservation. Please try again.', 'error');
+            Utils.showToast(t('toastCancelFailed'), 'error');
         }
     },
 
@@ -956,7 +1108,7 @@ const AdminManager = {
 
     confirmCancelReservation(reservationId) {
         AppState.confirmCallback = () => this.cancelReservation(reservationId);
-        document.getElementById('confirmMessage').textContent = 'Are you sure you want to cancel this reservation?';
+        document.getElementById('confirmMessage').textContent = t('confirmCancelReservation');
         Utils.showModal('confirmModal');
     },
 
@@ -965,7 +1117,7 @@ const AdminManager = {
         const grid = document.getElementById('adminMoviesGrid');
 
         if (movies.length === 0) {
-            grid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No movies available</p>';
+            grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center;">${t('noMoviesAvailable')}</p>`;
             return;
         }
 
@@ -1015,7 +1167,7 @@ const AdminManager = {
             const movies = await DataManager.getMovies();
             const movie = movies.find(m => m.id === movieId);
             if (movie) {
-                title.textContent = 'Edit Movie';
+                title.textContent = t('editMovieTitle');
                 document.getElementById('movieId').value = movie.id;
                 document.getElementById('moviePoster').value = movie.poster;
                 document.getElementById('movieTitle').value = movie.title;
@@ -1031,7 +1183,7 @@ const AdminManager = {
                 }
             }
         } else {
-            title.textContent = 'Add Movie';
+            title.textContent = t('addMovieTitle');
             document.getElementById('movieId').value = '';
         }
 
@@ -1068,12 +1220,12 @@ const AdminManager = {
         Utils.hideModal('adminModal');
         await this.renderDashboard();
         await MovieManager.renderMovies();
-        Utils.showToast(movieId ? 'Movie updated successfully' : 'Movie added successfully', 'success');
+        Utils.showToast(movieId ? t('toastMovieUpdated') : t('toastMovieAdded'), 'success');
     },
 
     confirmDeleteMovie(movieId) {
         AppState.confirmCallback = () => this.deleteMovie(movieId);
-        document.getElementById('confirmMessage').textContent = 'Are you sure you want to delete this movie?';
+        document.getElementById('confirmMessage').textContent = t('confirmDeleteMovie');
         Utils.showModal('confirmModal');
     },
 
@@ -1082,10 +1234,10 @@ const AdminManager = {
             await DataManager.deleteMovieById(movieId);
             await this.renderDashboard();
             await MovieManager.renderMovies();
-            Utils.showToast('Movie deleted successfully', 'success');
+            Utils.showToast(t('toastMovieDeleted'), 'success');
         } catch (error) {
             console.error('Delete failed:', error);
-            Utils.showToast('Could not delete movie. Please try again.', 'error');
+            Utils.showToast(t('toastDeleteFailed'), 'error');
         }
     },
 
@@ -1094,7 +1246,7 @@ const AdminManager = {
         const tbody = document.querySelector('#customersTable tbody');
 
         if (customers.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No customers yet</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${t('noCustomersYet')}</td></tr>`;
             return;
         }
 
@@ -1113,7 +1265,7 @@ const AdminManager = {
         const reservations = await DataManager.getReservations();
         
         if (reservations.length === 0) {
-            Utils.showToast('No reservations to export', 'error');
+            Utils.showToast(t('toastNoReservationsExport'), 'error');
             return;
         }
 
@@ -1145,7 +1297,7 @@ const AdminManager = {
         link.click();
         document.body.removeChild(link);
         
-        Utils.showToast('Reservations exported successfully', 'success');
+        Utils.showToast(t('toastExported'), 'success');
     }
 };
 
@@ -1156,6 +1308,21 @@ function initializeEventListeners() {
     document.getElementById('homeBtn').addEventListener('click', async () => {
         await MovieManager.renderMovies();
         Utils.showSection('homeSection');
+    });
+
+    // Clicking the logo/brand name also goes home, same as the Home button
+    document.getElementById('logoHomeBtn').addEventListener('click', async () => {
+        await MovieManager.renderMovies();
+        Utils.showSection('homeSection');
+    });
+
+    // Language toggle: swap en <-> fr, remember the choice, and re-render
+    // whatever's on screen right now in the new language.
+    document.getElementById('langToggleBtn').addEventListener('click', async () => {
+        currentLang = currentLang === 'en' ? 'fr' : 'en';
+        Storage.set(STORAGE_KEYS.LANG, currentLang);
+        applyStaticTranslations();
+        await refreshCurrentView();
     });
 
     document.getElementById('adminBtn').addEventListener('click', async () => {
@@ -1203,6 +1370,57 @@ function initializeEventListeners() {
         window.print();
     });
 
+    // Downloads a standalone HTML file with just the ticket — no external
+    // libraries needed, and it stays viewable/printable offline forever
+    // (the QR code image is the one exception: it needs internet to load,
+    // same as it does on this page).
+    document.getElementById('downloadTicketBtn').addEventListener('click', () => {
+        const reservation = AppState.currentReservation;
+        if (!reservation) return;
+
+        const ticketHtml = `<!DOCTYPE html>
+<html lang="${currentLang}">
+<head>
+<meta charset="UTF-8">
+<title>${t('brandName')} — ${reservation.id}</title>
+<style>
+    body { background:#0D0D0D; color:#F3EFE7; font-family: Arial, sans-serif; display:flex; justify-content:center; padding:40px 20px; }
+    .ticket { background:#1A1A1A; border:1px dashed #E50914; border-radius:16px; padding:28px; max-width:420px; width:100%; }
+    h1 { color:#E50914; font-size:1.3rem; margin:0 0 4px; }
+    .sub { color:#999; font-size:0.8rem; margin-bottom:18px; }
+    p { margin:8px 0; font-size:0.95rem; }
+    strong { color:#FFD54F; }
+    .qr { text-align:center; margin-top:18px; }
+    .qr img { border-radius:8px; }
+    @media print { body { background:#fff; color:#000; padding:0; } .ticket { border-color:#E50914; } }
+</style>
+</head>
+<body>
+    <div class="ticket">
+        <h1>${t('brandName')}</h1>
+        <div class="sub">${reservation.id}</div>
+        <p><strong>${t('labelMovie')}</strong> ${reservation.movieTitle}</p>
+        <p><strong>${t('labelSeats')}</strong> ${reservation.seats.join(', ')}</p>
+        <p><strong>${t('labelDate')}</strong> ${Utils.formatDate(reservation.purchaseDate)}</p>
+        <p><strong>${t('labelTotalPaid')}</strong> ${Utils.formatCurrency(reservation.price)}</p>
+        <div class="qr">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(JSON.stringify(reservation))}" alt="QR Code">
+        </div>
+    </div>
+</body>
+</html>`;
+
+        const blob = new Blob([ticketHtml], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `ticket-${reservation.id}.html`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    });
+
     document.getElementById('newReservationBtn').addEventListener('click', async () => {
         CheckoutManager.reset();
         await MovieManager.renderMovies();
@@ -1222,9 +1440,9 @@ function initializeEventListeners() {
             document.getElementById('adminLoginForm').reset();
             await AdminManager.renderDashboard();
             Utils.showSection('adminDashboardSection');
-            Utils.showToast('Login successful', 'success');
+            Utils.showToast(t('toastLoginSuccess'), 'success');
         } else {
-            errorElement.textContent = 'Invalid username or password.';
+            errorElement.textContent = t('toastInvalidLogin');
         }
     });
 
@@ -1263,14 +1481,14 @@ function initializeEventListeners() {
         if (!file) return;
 
         if (!file.type.startsWith('image/')) {
-            Utils.showToast('Please choose an image file', 'error');
+            Utils.showToast(t('toastChooseImage'), 'error');
             e.target.value = '';
             return;
         }
         // Keep it sane for a TEXT column and a snappy page — 5MB of raw
         // image is already large once base64-encoded (~6.7MB as text).
         if (file.size > 5 * 1024 * 1024) {
-            Utils.showToast('Image is too large (max 5MB)', 'error');
+            Utils.showToast(t('toastImageTooLarge'), 'error');
             e.target.value = '';
             return;
         }
@@ -1283,7 +1501,7 @@ function initializeEventListeners() {
             preview.style.display = 'block';
         };
         reader.onerror = () => {
-            Utils.showToast('Could not read that image file', 'error');
+            Utils.showToast(t('toastImageReadError'), 'error');
         };
         reader.readAsDataURL(file);
     });
@@ -1372,6 +1590,10 @@ function initializeEventListeners() {
 
 async function initializeApp() {
     try {
+        // Load saved language preference (defaults to English)
+        currentLang = Storage.get(STORAGE_KEYS.LANG, 'en');
+        applyStaticTranslations();
+
         // Initialize data
         await DataManager.initializeData();
 

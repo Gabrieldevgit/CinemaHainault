@@ -54,9 +54,11 @@ body {
 }
 
 .logo-icon {
-    width: 26px;
-    height: 26px;
+    height: 42px;
+    width: auto;
     flex-shrink: 0;
+    object-fit: contain;
+    border-radius: 6px;
 }
 
 .nav-actions {
@@ -1084,4 +1086,29 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary);
+}
+/* ==================== PRINT: TICKET ONLY ====================
+   Without this, window.print() prints the entire page — nav, buttons,
+   whatever section happens to be behind the modal, etc. This hides
+   everything except #ticketPrintArea while a print is in progress. */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #ticketPrintArea,
+    #ticketPrintArea * {
+        visibility: visible;
+    }
+    #ticketPrintArea {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        padding: 2rem;
+    }
+    .navbar,
+    .btn,
+    #toast {
+        display: none !important;
+    }
 }

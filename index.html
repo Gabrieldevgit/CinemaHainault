@@ -11,13 +11,14 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <h1 class="logo">
-                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.2 6L3 11l1.9 7.5 17.2-5L20.2 6z"/><path d="M6.5 8.5l3 3M11.5 7l3 3M16.5 5.5l3 3"/></svg>
-                Le Cinéma Hainault
+            <h1 class="logo" id="logoHomeBtn" style="cursor:pointer;" title="Go to home">
+                <img src="cinema-logo.png" alt="Le Cinéma Hainault" class="logo-icon">
+                <span data-i18n="brandName">Le Cinéma Hainault</span>
             </h1>
             <div class="nav-actions">
-                <button id="homeBtn" class="nav-btn">Home</button>
-                <button id="adminBtn" class="nav-btn admin-btn">Admin</button>
+                <button id="langToggleBtn" class="nav-btn" type="button">FR</button>
+                <button id="homeBtn" class="nav-btn" data-i18n="navHome">Home</button>
+                <button id="adminBtn" class="nav-btn admin-btn" data-i18n="navAdmin">Admin</button>
             </div>
         </div>
     </nav>
@@ -27,19 +28,19 @@
         <!-- Home Section -->
         <section id="homeSection" class="section active">
             <div class="hero">
-                <h2>Now Showing</h2>
+                <h2 data-i18n="nowShowing">Now Showing</h2>
                 <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Search movies...">
+                    <input type="text" id="searchInput" placeholder="Search movies..." data-i18n-placeholder="searchPlaceholder">
                     <select id="genreFilter">
-                        <option value="">All Genres</option>
-                        <option value="Action">Action</option>
-                        <option value="Comedy">Comedy</option>
-                        <option value="Drama">Drama</option>
-                        <option value="Horror">Horror</option>
-                        <option value="Animation">Animation</option>
-                        <option value="Sci-Fi">Sci-Fi</option>
-                        <option value="Romance">Romance</option>
-                        <option value="Thriller">Thriller</option>
+                        <option value="" data-i18n="allGenres">All Genres</option>
+                        <option value="Action" data-i18n="genreAction">Action</option>
+                        <option value="Comedy" data-i18n="genreComedy">Comedy</option>
+                        <option value="Drama" data-i18n="genreDrama">Drama</option>
+                        <option value="Horror" data-i18n="genreHorror">Horror</option>
+                        <option value="Animation" data-i18n="genreAnimation">Animation</option>
+                        <option value="Sci-Fi" data-i18n="genreSciFi">Sci-Fi</option>
+                        <option value="Romance" data-i18n="genreRomance">Romance</option>
+                        <option value="Thriller" data-i18n="genreThriller">Thriller</option>
                     </select>
                 </div>
             </div>
@@ -48,64 +49,64 @@
 
         <!-- Movie Detail Section -->
         <section id="movieDetailSection" class="section">
-            <button id="backBtn" class="back-btn">← Back to Movies</button>
+            <button id="backBtn" class="back-btn" data-i18n="backToMovies">← Back to Movies</button>
             <div id="movieDetail" class="movie-detail"></div>
         </section>
 
         <!-- Seat Selection Section -->
         <section id="seatSection" class="section">
-            <button id="backToMovieBtn" class="back-btn">← Back to Movie</button>
+            <button id="backToMovieBtn" class="back-btn" data-i18n="backToMovie">← Back to Movie</button>
             <div id="seatSelection" class="seat-selection">
                 <div class="screen">
-                    <div class="screen-text">SCREEN</div>
+                    <div class="screen-text" data-i18n="screenLabel">SCREEN</div>
                 </div>
                 <div id="seatingLayout" class="seating-layout"></div>
                 <div class="seat-legend">
                     <div class="legend-item">
                         <div class="seat available"></div>
-                        <span>Available</span>
+                        <span data-i18n="seatAvailable">Available</span>
                     </div>
                     <div class="legend-item">
                         <div class="seat selected"></div>
-                        <span>Selected</span>
+                        <span data-i18n="seatSelected">Selected</span>
                     </div>
                     <div class="legend-item">
                         <div class="seat reserved"></div>
-                        <span>Reserved</span>
+                        <span data-i18n="seatReserved">Reserved</span>
                     </div>
                     <div class="legend-item">
                         <div class="seat disabled"></div>
-                        <span>Disabled</span>
+                        <span data-i18n="seatDisabled">Disabled</span>
                     </div>
                 </div>
                 <div class="selected-seats-info">
-                    <p>Selected Seats: <span id="selectedSeatsDisplay">None</span></p>
-                    <p>Total: $<span id="totalPrice">0</span></p>
+                    <p><span data-i18n="selectedSeatsLabel">Selected Seats:</span> <span id="selectedSeatsDisplay">None</span></p>
+                    <p><span data-i18n="totalLabel">Total:</span> $<span id="totalPrice">0</span></p>
                 </div>
-                <button id="proceedToCheckoutBtn" class="btn primary-btn" disabled>Proceed to Checkout</button>
+                <button id="proceedToCheckoutBtn" class="btn primary-btn" disabled data-i18n="proceedToCheckout">Proceed to Checkout</button>
             </div>
         </section>
 
         <!-- Checkout Section -->
         <section id="checkoutSection" class="section">
-            <button id="backToSeatsBtn" class="back-btn">← Back to Seats</button>
+            <button id="backToSeatsBtn" class="back-btn" data-i18n="backToSeats">← Back to Seats</button>
             <div class="checkout-container">
-                <h2>Complete Your Reservation</h2>
+                <h2 data-i18n="completeReservation">Complete Your Reservation</h2>
                 <div id="checkoutSummary" class="checkout-summary"></div>
                 <form id="customerForm" class="customer-form">
                     <div class="form-group">
-                        <label for="fullName">Full Name *</label>
+                        <label for="fullName" data-i18n="fullNameLabel">Full Name *</label>
                         <input type="text" id="fullName" required>
                     </div>
                     <div class="form-group">
-                        <label for="email">Email *</label>
+                        <label for="email" data-i18n="emailLabel">Email *</label>
                         <input type="email" id="email" required>
                     </div>
                     <div class="form-group">
-                        <label for="phone">Phone Number *</label>
+                        <label for="phone" data-i18n="phoneLabel">Phone Number *</label>
                         <input type="tel" id="phone" required>
                     </div>
-                    <button type="submit" class="btn primary-btn">Confirm Reservation</button>
+                    <button type="submit" class="btn primary-btn" data-i18n="confirmReservation">Confirm Reservation</button>
                 </form>
             </div>
         </section>
@@ -113,33 +114,36 @@
         <!-- Confirmation Section -->
         <section id="confirmationSection" class="section">
             <div class="confirmation-container">
-                <div class="success-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                <div id="ticketPrintArea">
+                    <div class="success-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                    </div>
+                    <h2 data-i18n="reservationConfirmedTitle">Reservation Confirmed!</h2>
+                    <div id="confirmationDetails" class="confirmation-details"></div>
+                    <div id="qrCode" class="qr-code"></div>
                 </div>
-                <h2>Reservation Confirmed!</h2>
-                <div id="confirmationDetails" class="confirmation-details"></div>
-                <div id="qrCode" class="qr-code"></div>
-                <button id="printTicketBtn" class="btn secondary-btn">Print Ticket</button>
-                <button id="newReservationBtn" class="btn primary-btn">Make New Reservation</button>
+                <button id="printTicketBtn" class="btn secondary-btn" data-i18n="printTicket">Print Ticket</button>
+                <button id="downloadTicketBtn" class="btn secondary-btn" data-i18n="downloadTicket">Download Ticket</button>
+                <button id="newReservationBtn" class="btn primary-btn" data-i18n="newReservation">Make New Reservation</button>
             </div>
         </section>
 
         <!-- Admin Login Section -->
         <section id="adminLoginSection" class="section">
             <div class="admin-login-container">
-                <h2>Admin Login</h2>
+                <h2 data-i18n="adminLoginTitle">Admin Login</h2>
                 <form id="adminLoginForm" class="admin-login-form">
                     <div class="form-group">
-                        <label for="adminUsername">Username</label>
+                        <label for="adminUsername" data-i18n="usernameLabel">Username</label>
                         <input type="text" id="adminUsername" required>
                     </div>
                     <div class="form-group">
-                        <label for="adminPassword">Password</label>
+                        <label for="adminPassword" data-i18n="passwordLabel">Password</label>
                         <input type="password" id="adminPassword" required>
                     </div>
                     <p id="loginError" class="error-message"></p>
-                    <button type="submit" class="btn primary-btn">Login</button>
-                    <button type="button" id="cancelAdminLoginBtn" class="btn secondary-btn">Cancel</button>
+                    <button type="submit" class="btn primary-btn" data-i18n="loginBtn">Login</button>
+                    <button type="button" id="cancelAdminLoginBtn" class="btn secondary-btn" data-i18n="cancelBtn">Cancel</button>
                 </form>
             </div>
         </section>
@@ -148,16 +152,16 @@
         <section id="adminDashboardSection" class="section">
             <div class="admin-dashboard">
                 <div class="dashboard-header">
-                    <h2>Admin Dashboard</h2>
-                    <button id="logoutBtn" class="btn secondary-btn">Logout</button>
+                    <h2 data-i18n="adminDashboardTitle">Admin Dashboard</h2>
+                    <button id="logoutBtn" class="btn secondary-btn" data-i18n="logoutBtn">Logout</button>
                 </div>
                 
                 <!-- Dashboard Tabs -->
                 <div class="dashboard-tabs">
-                    <button class="tab-btn active" data-tab="overview">Overview</button>
-                    <button class="tab-btn" data-tab="reservations">Reservations</button>
-                    <button class="tab-btn" data-tab="movies">Movies</button>
-                    <button class="tab-btn" data-tab="customers">Customers</button>
+                    <button class="tab-btn active" data-tab="overview" data-i18n="tabOverview">Overview</button>
+                    <button class="tab-btn" data-tab="reservations" data-i18n="tabReservations">Reservations</button>
+                    <button class="tab-btn" data-tab="movies" data-i18n="tabMovies">Movies</button>
+                    <button class="tab-btn" data-tab="customers" data-i18n="tabCustomers">Customers</button>
                 </div>
 
                 <!-- Overview Tab -->
@@ -166,32 +170,32 @@
                         <div class="stat-card">
                             <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 9a2 2 0 012-2h16a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H4a2 2 0 01-2-2v-2a2 2 0 000-4V9z"/><path d="M9 7v10"/></svg></div>
                             <div class="stat-value" id="totalReservations">0</div>
-                            <div class="stat-label">Total Reservations</div>
+                            <div class="stat-label" data-i18n="statTotalReservations">Total Reservations</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 10V6a2 2 0 012-2h8a2 2 0 012 2v4"/><path d="M4 10h16v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6z"/><path d="M6 18v2M18 18v2"/></svg></div>
                             <div class="stat-value" id="availableSeats">0</div>
-                            <div class="stat-label">Available Seats</div>
+                            <div class="stat-label" data-i18n="statAvailableSeats">Available Seats</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
                             <div class="stat-value" id="occupiedSeats">0</div>
-                            <div class="stat-label">Occupied Seats</div>
+                            <div class="stat-label" data-i18n="statOccupiedSeats">Occupied Seats</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M2 7l3-4h4l-3 4M9 7l3-4h4l-3 4M16 7l3-4h3l-3 4"/></svg></div>
                             <div class="stat-value" id="totalMovies">0</div>
-                            <div class="stat-label">Movies Showing</div>
+                            <div class="stat-label" data-i18n="statMoviesShowing">Movies Showing</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9.5 9.5a2.5 2.5 0 012.5-1.5c1.5 0 2.5.8 2.5 2s-1 1.7-2.5 2-2.5.8-2.5 2 1 2 2.5 2a2.5 2.5 0 002.5-1.5"/></svg></div>
                             <div class="stat-value" id="totalRevenue">$0</div>
-                            <div class="stat-label">Total Revenue</div>
+                            <div class="stat-label" data-i18n="statTotalRevenue">Total Revenue</div>
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg></div>
                             <div class="stat-value" id="occupancyRate">0%</div>
-                            <div class="stat-label">Seat Occupancy</div>
+                            <div class="stat-label" data-i18n="statSeatOccupancy">Seat Occupancy</div>
                         </div>
                     </div>
                 </div>
@@ -199,21 +203,21 @@
                 <!-- Reservations Tab -->
                 <div id="reservationsTab" class="tab-content">
                     <div class="tab-header">
-                        <h3>Reservations</h3>
-                        <button id="exportReservationsBtn" class="btn secondary-btn">Export CSV</button>
+                        <h3 data-i18n="reservationsTitle">Reservations</h3>
+                        <button id="exportReservationsBtn" class="btn secondary-btn" data-i18n="exportCsv">Export CSV</button>
                     </div>
                     <div class="table-container">
                         <table id="reservationsTable" class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Reservation ID</th>
-                                    <th>Customer</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Movie</th>
-                                    <th>Seat</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
+                                    <th data-i18n="thReservationId">Reservation ID</th>
+                                    <th data-i18n="thCustomer">Customer</th>
+                                    <th data-i18n="thEmail">Email</th>
+                                    <th data-i18n="thPhone">Phone</th>
+                                    <th data-i18n="thMovie">Movie</th>
+                                    <th data-i18n="thSeat">Seat</th>
+                                    <th data-i18n="thDate">Date</th>
+                                    <th data-i18n="thActions">Actions</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -224,8 +228,8 @@
                 <!-- Movies Tab -->
                 <div id="moviesTab" class="tab-content">
                     <div class="tab-header">
-                        <h3>Movies</h3>
-                        <button id="addMovieBtn" class="btn primary-btn">Add Movie</button>
+                        <h3 data-i18n="moviesTitle">Movies</h3>
+                        <button id="addMovieBtn" class="btn primary-btn" data-i18n="addMovie">Add Movie</button>
                     </div>
                     <div id="adminMoviesGrid" class="admin-movies-grid"></div>
                 </div>
@@ -233,17 +237,17 @@
                 <!-- Customers Tab -->
                 <div id="customersTab" class="tab-content">
                     <div class="tab-header">
-                        <h3>Customers</h3>
+                        <h3 data-i18n="customersTitle">Customers</h3>
                     </div>
                     <div class="table-container">
                         <table id="customersTable" class="data-table">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Phone</th>
-                                    <th>Total Reservations</th>
-                                    <th>History</th>
+                                    <th data-i18n="thName">Name</th>
+                                    <th data-i18n="thEmail">Email</th>
+                                    <th data-i18n="thPhone">Phone</th>
+                                    <th data-i18n="thTotalReservations">Total Reservations</th>
+                                    <th data-i18n="thHistory">History</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -258,35 +262,35 @@
     <div id="adminModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Add Movie</h3>
+                <h3 id="modalTitle" data-i18n="addMovieTitle">Add Movie</h3>
                 <button id="closeModalBtn" class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="movieForm" class="movie-form">
                     <input type="hidden" id="movieId" name="movieId">
                     <div class="form-group">
-                        <label for="moviePosterFile">Poster</label>
+                        <label for="moviePosterFile" data-i18n="posterLabel">Poster</label>
                         <input type="file" id="moviePosterFile" name="moviePosterFile" accept="image/*">
-                        <div style="margin: 0.5rem 0; font-size: 0.85rem; color: var(--text-secondary, #999);">— or paste a URL below —</div>
+                        <div style="margin: 0.5rem 0; font-size: 0.85rem; color: var(--text-secondary, #999);" data-i18n="posterUrlHint">— or paste a URL below —</div>
                         <input type="url" id="moviePoster" name="moviePoster" placeholder="https://example.com/poster.jpg">
                         <img id="posterPreview" src="" alt="Poster preview" style="display:none; margin-top:0.75rem; max-width:150px; border-radius:6px;">
                     </div>
                     <div class="form-group">
-                        <label for="movieTitle">Title *</label>
+                        <label for="movieTitle" data-i18n="titleLabel">Title *</label>
                         <input type="text" id="movieTitle" name="movieTitle" required>
                     </div>
                     <div class="form-group">
-                        <label for="movieDescription">Description *</label>
+                        <label for="movieDescription" data-i18n="descriptionLabel">Description *</label>
                         <textarea id="movieDescription" name="movieDescription" rows="3" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="movieDuration">Duration *</label>
+                        <label for="movieDuration" data-i18n="durationLabel">Duration *</label>
                         <input type="text" id="movieDuration" name="movieDuration" placeholder="e.g., 1h 36m" required>
                     </div>
                     <div class="form-group">
-                        <label for="movieGenre">Genre *</label>
+                        <label for="movieGenre" data-i18n="genreLabel">Genre *</label>
                         <select id="movieGenre" name="movieGenre" required>
-                            <option value="">Select Genre</option>
+                            <option value="" data-i18n="selectGenre">Select Genre</option>
                             <option value="Action">Action</option>
                             <option value="Comedy">Comedy</option>
                             <option value="Drama">Drama</option>
@@ -298,9 +302,9 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="movieAgeRating">Age Rating *</label>
+                        <label for="movieAgeRating" data-i18n="ageRatingLabel">Age Rating *</label>
                         <select id="movieAgeRating" name="movieAgeRating" required>
-                            <option value="">Select Rating</option>
+                            <option value="" data-i18n="selectRating">Select Rating</option>
                             <option value="G">G</option>
                             <option value="PG">PG</option>
                             <option value="PG-13">PG-13</option>
@@ -309,16 +313,16 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="movieShowtime">Showtime *</label>
+                        <label for="movieShowtime" data-i18n="showtimeLabel">Showtime *</label>
                         <input type="time" id="movieShowtime" name="movieShowtime" required>
                     </div>
                     <div class="form-group">
-                        <label for="moviePrice">Price ($) *</label>
+                        <label for="moviePrice" data-i18n="priceLabel">Price ($) *</label>
                         <input type="number" id="moviePrice" name="moviePrice" min="0" step="0.01" required>
                     </div>
                     <div class="form-actions">
-                        <button type="submit" class="btn primary-btn">Save Movie</button>
-                        <button type="button" id="cancelMovieBtn" class="btn secondary-btn">Cancel</button>
+                        <button type="submit" class="btn primary-btn" data-i18n="saveMovie">Save Movie</button>
+                        <button type="button" id="cancelMovieBtn" class="btn secondary-btn" data-i18n="cancelBtn">Cancel</button>
                     </div>
                 </form>
             </div>
@@ -329,14 +333,14 @@
     <div id="confirmModal" class="modal">
         <div class="modal-content confirm-modal">
             <div class="modal-header">
-                <h3>Confirm Action</h3>
+                <h3 data-i18n="confirmActionTitle">Confirm Action</h3>
                 <button id="closeConfirmModalBtn" class="close-btn">&times;</button>
             </div>
             <div class="modal-body">
-                <p id="confirmMessage">Are you sure you want to proceed?</p>
+                <p id="confirmMessage" data-i18n="confirmActionDefault">Are you sure you want to proceed?</p>
                 <div class="form-actions">
-                    <button id="confirmActionBtn" class="btn danger-btn">Confirm</button>
-                    <button id="cancelConfirmBtn" class="btn secondary-btn">Cancel</button>
+                    <button id="confirmActionBtn" class="btn danger-btn" data-i18n="confirmBtn">Confirm</button>
+                    <button id="cancelConfirmBtn" class="btn secondary-btn" data-i18n="cancelBtn">Cancel</button>
                 </div>
             </div>
         </div>
