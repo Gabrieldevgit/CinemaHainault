@@ -37,6 +37,17 @@ const ADMIN_CREDENTIALS = {
 };
 
 // Default movies data
+// A broken/missing poster falls back to this instead of via.placeholder.com —
+// that service has been unreliable (the ERR_CONNECTION_CLOSED spam you saw),
+// and every failed fetch to it retriggers the same onerror handler. This is
+// a plain inline SVG: no network request, so it can never fail to load.
+const DEFAULT_POSTER_PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450">' +
+    '<rect width="300" height="450" fill="#1a1a1a"/>' +
+    '<text x="150" y="225" font-family="sans-serif" font-size="18" fill="#666" text-anchor="middle">No Poster</text>' +
+    '</svg>'
+);
+
 const DEFAULT_MOVIES = [
     {
         id: '1',
@@ -270,6 +281,38 @@ const DataManager = {
         return Storage.set(STORAGE_KEYS.MOVIES, movies);
     },
 
+    // Adds or updates exactly ONE movie. Used for every admin add/edit
+    // instead of saveMovies(): saveMovies() re-upserts every movie in the
+    // table on every call, which — since an upsert always writes the row,
+    // whether or not its data actually changed — fires one Realtime UPDATE
+    // event PER MOVIE for a single edit. Each of those events forces a full
+    // re-render, which reloads every poster image again, which is exactly
+    // the flashing/flicker you're seeing. A single upsert only ever touches
+    // (and only ever notifies about) the one row that actually changed.
+    async upsertMovie(movie) {
+        if (useSupabase && supabaseClient) {
+            const { error } = await supabaseClient.from('movies').upsert(this.toDbMovie(movie), { onConflict: 'id' });
+            if (error) throw error;
+            return true;
+        }
+        const movies = Storage.get(STORAGE_KEYS.MOVIES, DEFAULT_MOVIES);
+        const index = movies.findIndex(m => m.id === movie.id);
+        if (index !== -1) movies[index] = movie; else movies.push(movie);
+        Storage.set(STORAGE_KEYS.MOVIES, movies);
+        return true;
+    },
+
+    async deleteMovieById(id) {
+        if (useSupabase && supabaseClient) {
+            const { error } = await supabaseClient.from('movies').delete().eq('id', id);
+            if (error) throw error;
+            return true;
+        }
+        const movies = Storage.get(STORAGE_KEYS.MOVIES, DEFAULT_MOVIES);
+        Storage.set(STORAGE_KEYS.MOVIES, movies.filter(m => m.id !== id));
+        return true;
+    },
+
     async getReservations() {
         if (useSupabase && supabaseClient) {
             try {
@@ -481,7 +524,7 @@ const MovieManager = {
 
         grid.innerHTML = allMovies.map(movie => `
             <div class="movie-card" data-movie-id="${movie.id}">
-                <img src="${movie.poster}" alt="${movie.title}" class="movie-poster" onerror="this.src='https://via.placeholder.com/300x400?text=No+Poster'">
+                <img src="${movie.poster}" alt="${movie.title}" class="movie-poster" onerror="this.onerror=null;this.src=DEFAULT_POSTER_PLACEHOLDER">
                 <div class="movie-info">
                     <h3 class="movie-title">${movie.title}</h3>
                     <div class="movie-meta">
@@ -511,7 +554,7 @@ const MovieManager = {
         
         detail.innerHTML = `
             <div class="movie-detail-content">
-                <img src="${movie.poster}" alt="${movie.title}" class="movie-detail-poster" onerror="this.src='https://via.placeholder.com/300x400?text=No+Poster'">
+                <img src="${movie.poster}" alt="${movie.title}" class="movie-detail-poster" onerror="this.onerror=null;this.src=DEFAULT_POSTER_PLACEHOLDER">
                 <div class="movie-detail-info">
                     <h3>${movie.title}</h3>
                     <div class="movie-detail-meta">
@@ -928,7 +971,7 @@ const AdminManager = {
 
         grid.innerHTML = movies.map(movie => `
             <div class="admin-movie-card">
-                <img src="${movie.poster}" alt="${movie.title}" class="admin-movie-poster" onerror="this.src='https://via.placeholder.com/250x300?text=No+Poster'">
+                <img src="${movie.poster}" alt="${movie.title}" class="admin-movie-poster" onerror="this.onerror=null;this.src=DEFAULT_POSTER_PLACEHOLDER">
                 <div class="admin-movie-info">
                     <h4>${movie.title}</h4>
                     <p>${movie.genre} • ${movie.duration} • ${movie.ageRating}</p>
@@ -962,8 +1005,11 @@ const AdminManager = {
         const modal = document.getElementById('adminModal');
         const form = document.getElementById('movieForm');
         const title = document.getElementById('modalTitle');
+        const preview = document.getElementById('posterPreview');
 
         form.reset();
+        preview.style.display = 'none';
+        preview.src = '';
 
         if (movieId) {
             const movies = await DataManager.getMovies();
@@ -979,6 +1025,10 @@ const AdminManager = {
                 document.getElementById('movieAgeRating').value = movie.ageRating;
                 document.getElementById('movieShowtime').value = movie.showtime;
                 document.getElementById('moviePrice').value = movie.price;
+                if (movie.poster) {
+                    preview.src = movie.poster;
+                    preview.style.display = 'block';
+                }
             }
         } else {
             title.textContent = 'Add Movie';
@@ -989,11 +1039,10 @@ const AdminManager = {
     },
 
     async saveMovie(formData) {
-        const movies = await DataManager.getMovies();
         const movieId = formData.get('movieId');
 
         const movieData = {
-            poster: formData.get('moviePoster') || 'https://via.placeholder.com/300x400?text=No+Poster',
+            poster: formData.get('moviePoster') || DEFAULT_POSTER_PLACEHOLDER,
             title: formData.get('movieTitle') || 'Untitled Movie',
             description: formData.get('movieDescription') || '',
             duration: formData.get('movieDuration') || '120 min',
@@ -1003,19 +1052,19 @@ const AdminManager = {
             price: parseFloat(formData.get('moviePrice')) || 12.00
         };
 
+        let finalMovie;
         if (movieId) {
-            // Edit existing movie
-            const index = movies.findIndex(m => m.id === movieId);
-            if (index !== -1) {
-                movies[index] = { ...movies[index], ...movieData };
-            }
+            // Edit existing movie — merge with what's already there so we
+            // don't drop fields that weren't part of this form submission.
+            const movies = await DataManager.getMovies();
+            const existing = movies.find(m => m.id === movieId) || {};
+            finalMovie = { ...existing, ...movieData, id: movieId };
         } else {
             // Add new movie
-            movieData.id = Utils.generateId();
-            movies.push(movieData);
+            finalMovie = { ...movieData, id: Utils.generateId() };
         }
 
-        await DataManager.saveMovies(movies);
+        await DataManager.upsertMovie(finalMovie);
         Utils.hideModal('adminModal');
         await this.renderDashboard();
         await MovieManager.renderMovies();
@@ -1029,15 +1078,14 @@ const AdminManager = {
     },
 
     async deleteMovie(movieId) {
-        const movies = await DataManager.getMovies();
-        const index = movies.findIndex(m => m.id === movieId);
-        
-        if (index !== -1) {
-            movies.splice(index, 1);
-            await DataManager.saveMovies(movies);
+        try {
+            await DataManager.deleteMovieById(movieId);
             await this.renderDashboard();
             await MovieManager.renderMovies();
             Utils.showToast('Movie deleted successfully', 'success');
+        } catch (error) {
+            console.error('Delete failed:', error);
+            Utils.showToast('Could not delete movie. Please try again.', 'error');
         }
     },
 
@@ -1205,6 +1253,50 @@ function initializeEventListeners() {
     // Add movie button
     document.getElementById('addMovieBtn').addEventListener('click', () => {
         AdminManager.openMovieModal();
+    });
+
+    // Device upload for the poster: read the chosen image as a data URL and
+    // drop it straight into the same #moviePoster field the URL option
+    // uses, so saveMovie() doesn't need to know which one was used.
+    document.getElementById('moviePosterFile').addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith('image/')) {
+            Utils.showToast('Please choose an image file', 'error');
+            e.target.value = '';
+            return;
+        }
+        // Keep it sane for a TEXT column and a snappy page — 5MB of raw
+        // image is already large once base64-encoded (~6.7MB as text).
+        if (file.size > 5 * 1024 * 1024) {
+            Utils.showToast('Image is too large (max 5MB)', 'error');
+            e.target.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            document.getElementById('moviePoster').value = reader.result;
+            const preview = document.getElementById('posterPreview');
+            preview.src = reader.result;
+            preview.style.display = 'block';
+        };
+        reader.onerror = () => {
+            Utils.showToast('Could not read that image file', 'error');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Live preview when typing/pasting a poster URL directly
+    document.getElementById('moviePoster').addEventListener('input', (e) => {
+        const preview = document.getElementById('posterPreview');
+        if (e.target.value) {
+            preview.src = e.target.value;
+            preview.style.display = 'block';
+        } else {
+            preview.style.display = 'none';
+        }
     });
 
     // Movie form

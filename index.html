@@ -263,26 +263,29 @@
             </div>
             <div class="modal-body">
                 <form id="movieForm" class="movie-form">
-                    <input type="hidden" id="movieId">
+                    <input type="hidden" id="movieId" name="movieId">
                     <div class="form-group">
-                        <label for="moviePoster">Poster URL</label>
-                        <input type="url" id="moviePoster" required>
+                        <label for="moviePosterFile">Poster</label>
+                        <input type="file" id="moviePosterFile" name="moviePosterFile" accept="image/*">
+                        <div style="margin: 0.5rem 0; font-size: 0.85rem; color: var(--text-secondary, #999);">— or paste a URL below —</div>
+                        <input type="url" id="moviePoster" name="moviePoster" placeholder="https://example.com/poster.jpg">
+                        <img id="posterPreview" src="" alt="Poster preview" style="display:none; margin-top:0.75rem; max-width:150px; border-radius:6px;">
                     </div>
                     <div class="form-group">
                         <label for="movieTitle">Title *</label>
-                        <input type="text" id="movieTitle" required>
+                        <input type="text" id="movieTitle" name="movieTitle" required>
                     </div>
                     <div class="form-group">
                         <label for="movieDescription">Description *</label>
-                        <textarea id="movieDescription" rows="3" required></textarea>
+                        <textarea id="movieDescription" name="movieDescription" rows="3" required></textarea>
                     </div>
                     <div class="form-group">
                         <label for="movieDuration">Duration *</label>
-                        <input type="text" id="movieDuration" placeholder="e.g., 1h 36m" required>
+                        <input type="text" id="movieDuration" name="movieDuration" placeholder="e.g., 1h 36m" required>
                     </div>
                     <div class="form-group">
                         <label for="movieGenre">Genre *</label>
-                        <select id="movieGenre" required>
+                        <select id="movieGenre" name="movieGenre" required>
                             <option value="">Select Genre</option>
                             <option value="Action">Action</option>
                             <option value="Comedy">Comedy</option>
@@ -296,7 +299,7 @@
                     </div>
                     <div class="form-group">
                         <label for="movieAgeRating">Age Rating *</label>
-                        <select id="movieAgeRating" required>
+                        <select id="movieAgeRating" name="movieAgeRating" required>
                             <option value="">Select Rating</option>
                             <option value="G">G</option>
                             <option value="PG">PG</option>
@@ -307,11 +310,11 @@
                     </div>
                     <div class="form-group">
                         <label for="movieShowtime">Showtime *</label>
-                        <input type="time" id="movieShowtime" required>
+                        <input type="time" id="movieShowtime" name="movieShowtime" required>
                     </div>
                     <div class="form-group">
                         <label for="moviePrice">Price ($) *</label>
-                        <input type="number" id="moviePrice" min="0" step="0.01" required>
+                        <input type="number" id="moviePrice" name="moviePrice" min="0" step="0.01" required>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn primary-btn">Save Movie</button>
